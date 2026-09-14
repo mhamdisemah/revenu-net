@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Micro</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; background-color: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .result { margin-top: 20px; padding: 15px; background: #eef6ff; border-radius: 8px; }
+        .net { font-size: 1.4em; font-weight: bold; color: #007bff; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Calculateur Micro</h2>
+        <label>Nombre de jours :</label>
+        <input type="number" id="jours" placeholder="ex: 15" oninput="calculer()">
+        
+        <label>TJM (€) :</label>
+        <input type="number" id="tjm" placeholder="ex: 400" oninput="calculer()">
+        
+        <div class="result">
+            <p>CA Brut : <strong id="ca">0 €</strong></p>
+            <p>Cotisations ACRE (19.2%) : <strong id="acre">0 €</strong></p>
+            <p>CFP (18.24 €/mois) : <strong id="cfp">0 €</strong></p>
+            <p>Impôt à la source (6.5% ap. 34%) : <strong id="impot">0 €</strong></p>
+            <hr>
+            <div class="net">Net après impôt : <br><span id="net">0 €</span></div>
+        </div>
+    </div>
+
+    <script>
+        function calculer() {
+            let jours = parseFloat(document.getElementById('jours').value) || 0;
+            let tjm = parseFloat(document.getElementById('tjm').value) || 0;
+            
+            let ca = jours * tjm;
+            let acre = ca * 0.192;
+            let cfp = ca > 0 ? 18.24 : 0;
+            let impot = (ca * (1 - 0.34)) * 0.065;
+            let net = ca - (acre + cfp + impot);
+
+            document.getElementById('ca').innerText = ca.toFixed(2) + " €";
+            document.getElementById('acre').innerText = "-" + acre.toFixed(2) + " €";
+            document.getElementById('cfp').innerText = "-" + cfp.toFixed(2) + " €";
+            document.getElementById('impot').innerText = "-" + impot.toFixed(2) + " €";
+            document.getElementById('net').innerText = (net > 0 ? net : 0).toFixed(2) + " €";
+        }
+    </script>
+</body>
+</html>
+
