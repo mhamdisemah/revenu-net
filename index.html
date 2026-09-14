@@ -1,56 +1,197 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculateur Micro</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; background-color: #f4f4f9; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        label { font-weight: bold; display: block; margin-top: 10px; }
-        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .result { margin-top: 20px; padding: 15px; background: #eef6ff; border-radius: 8px; }
-        .net { font-size: 1.4em; font-weight: bold; color: #007bff; text-align: center; margin-top: 10px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Revenu Net</title>
+<style>
+  :root{
+    --bg:#0E1A19;
+    --card:#16262A;
+    --card-2:#1C2E32;
+    --line:#274044;
+    --text:#EDEEE9;
+    --muted:#8CA3A0;
+    --gold:#D4A64A;
+    --gold-soft:#3A3320;
+    --red:#C97C6B;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:480px; margin:0 auto; padding:28px 20px 60px;}
+  header{margin-bottom:28px;}
+  .eyebrow{font-size:13px; color:var(--muted); letter-spacing:0.02em; margin:0 0 4px;}
+  h1{font-size:26px; font-weight:650; margin:0; letter-spacing:-0.01em;}
+  h1 span{color:var(--gold);}
+
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
+  .field .input-row{
+    display:flex; align-items:center; background:var(--card);
+    border:1px solid var(--line); border-radius:14px; padding:2px;
+  }
+  .field .input-row:focus-within{border-color:var(--gold);}
+  .stepper-btn{
+    width:44px; height:44px; flex-shrink:0; background:transparent; border:none;
+    color:var(--text); font-size:20px; border-radius:12px; cursor:pointer;
+  }
+  .stepper-btn:active{background:var(--card-2);}
+  input[type=number]{
+    flex:1; min-width:0; background:transparent; border:none; color:var(--text);
+    font-size:20px; font-weight:600; text-align:center; padding:10px 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type=number]:focus{outline:none;}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .suffix{color:var(--muted); font-size:14px; padding-right:14px; flex-shrink:0;}
+
+  .divider{height:1px; background:var(--line); margin:26px 0;}
+
+  .result-card{
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:22px; margin-bottom:16px;
+  }
+  .net-label{font-size:13px; color:var(--muted); margin:0 0 6px;}
+  .net-value{font-size:40px; font-weight:700; letter-spacing:-0.02em; margin:0; font-variant-numeric: tabular-nums;}
+  .net-value .cur{font-size:22px; color:var(--muted); font-weight:500; margin-left:4px;}
+  .net-pct{font-size:13px; color:var(--gold); margin-top:8px;}
+
+  .breakdown{background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden;}
+  .row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:14px 18px; border-bottom:1px solid var(--line);
+  }
+  .row:last-child{border-bottom:none;}
+  .row.total{background:var(--card-2);}
+  .row-label{font-size:14px; color:var(--muted);}
+  .row-label .sub{display:block; font-size:11px; color:#5C7370; margin-top:2px;}
+  .row-value{font-size:15px; font-weight:600; font-variant-numeric: tabular-nums;}
+  .row-value.minus{color:var(--red);}
+  .row-value.plus{color:var(--text);}
+  .row.total .row-value{color:var(--gold); font-size:16px;}
+  .row.total .row-label{color:var(--text); font-weight:600;}
+
+  footer{margin-top:22px; font-size:12px; color:#5C7370; text-align:center; line-height:1.5;}
+</style>
 </head>
 <body>
-    <div class="card">
-        <h2>Calculateur Micro</h2>
-        <label>Nombre de jours :</label>
-        <input type="number" id="jours" placeholder="ex: 15" oninput="calculer()">
-        
-        <label>TJM (€) :</label>
-        <input type="number" id="tjm" placeholder="ex: 400" oninput="calculer()">
-        
-        <div class="result">
-            <p>CA Brut : <strong id="ca">0 €</strong></p>
-            <p>Cotisations ACRE (19.2%) : <strong id="acre">0 €</strong></p>
-            <p>CFP (18.24 €/mois) : <strong id="cfp">0 €</strong></p>
-            <p>Impôt à la source (6.5% ap. 34%) : <strong id="impot">0 €</strong></p>
-            <hr>
-            <div class="net">Net après impôt : <br><span id="net">0 €</span></div>
-        </div>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Micro-entreprise · BNC</p>
+    <h1>Revenu <span>net</span></h1>
+  </header>
+
+  <div class="field">
+    <label for="jours">Nombre de jours travaillés</label>
+    <div class="input-row">
+      <button class="stepper-btn" onclick="step('jours',-1)">−</button>
+      <input type="number" id="jours" value="18" min="0" step="0.5" inputmode="decimal" oninput="calc()">
+      <button class="stepper-btn" onclick="step('jours',1)">+</button>
     </div>
+  </div>
 
-    <script>
-        function calculer() {
-            let jours = parseFloat(document.getElementById('jours').value) || 0;
-            let tjm = parseFloat(document.getElementById('tjm').value) || 0;
-            
-            let ca = jours * tjm;
-            let acre = ca * 0.192;
-            let cfp = ca > 0 ? 18.24 : 0;
-            let impot = (ca * (1 - 0.34)) * 0.065;
-            let net = ca - (acre + cfp + impot);
+  <div class="field">
+    <label for="tjm">TJM</label>
+    <div class="input-row">
+      <button class="stepper-btn" onclick="step('tjm',-10)">−</button>
+      <input type="number" id="tjm" value="500" min="0" step="10" inputmode="decimal" oninput="calc()">
+      <button class="stepper-btn" onclick="step('tjm',10)">+</button>
+      <span class="suffix">€</span>
+    </div>
+  </div>
 
-            document.getElementById('ca').innerText = ca.toFixed(2) + " €";
-            document.getElementById('acre').innerText = "-" + acre.toFixed(2) + " €";
-            document.getElementById('cfp').innerText = "-" + cfp.toFixed(2) + " €";
-            document.getElementById('impot').innerText = "-" + impot.toFixed(2) + " €";
-            document.getElementById('net').innerText = (net > 0 ? net : 0).toFixed(2) + " €";
-        }
-    </script>
+  <div class="field">
+    <label for="mois">Nombre de mois (pour la CFP)</label>
+    <div class="input-row">
+      <button class="stepper-btn" onclick="step('mois',-1)">−</button>
+      <input type="number" id="mois" value="1" min="0" step="1" inputmode="decimal" oninput="calc()">
+      <button class="stepper-btn" onclick="step('mois',1)">+</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="result-card">
+    <p class="net-label">Revenu net estimé</p>
+    <p class="net-value"><span id="net">0</span><span class="cur">€</span></p>
+    <p class="net-pct" id="netPct"></p>
+  </div>
+
+  <div class="breakdown" id="breakdown"></div>
+
+  <footer>
+    Taux appliqués : ACRE 19,2 % · abattement fiscal 34 % · prélèvement à la source 6,5 % · CFP 18,24 €/mois.<br>
+    Estimation indicative, ne remplace pas une simulation officielle (URSSAF / impots.gouv.fr).
+  </footer>
+</div>
+
+<script>
+function step(id, delta){
+  const el = document.getElementById(id);
+  let v = parseFloat(el.value) || 0;
+  v = Math.max(0, v + delta);
+  el.value = v;
+  calc();
+}
+
+function fmt(n){
+  return n.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function calc(){
+  const jours = parseFloat(document.getElementById('jours').value) || 0;
+  const tjm = parseFloat(document.getElementById('tjm').value) || 0;
+  const mois = parseFloat(document.getElementById('mois').value) || 0;
+
+  const ACRE = 0.192;
+  const ABATTEMENT = 0.34;
+  const PAS = 0.065;
+  const CFP_MENSUEL = 18.24;
+
+  const ca = jours * tjm;
+  const cotisations = ca * ACRE;
+  const baseImposable = ca * (1 - ABATTEMENT);
+  const impot = baseImposable * PAS;
+  const cfp = CFP_MENSUEL * mois;
+  const net = ca - cotisations - impot - cfp;
+
+  document.getElementById('net').textContent = fmt(net);
+  document.getElementById('netPct').textContent = ca > 0
+    ? 'Soit ' + Math.round((net/ca)*100) + ' % du chiffre d\'affaires brut'
+    : '';
+
+  document.getElementById('breakdown').innerHTML = `
+    <div class="row">
+      <div class="row-label">Chiffre d'affaires brut<span class="sub">${jours} j × ${fmt(tjm)} €</span></div>
+      <div class="row-value plus">${fmt(ca)} €</div>
+    </div>
+    <div class="row">
+      <div class="row-label">Cotisations sociales<span class="sub">ACRE · 19,2 %</span></div>
+      <div class="row-value minus">− ${fmt(cotisations)} €</div>
+    </div>
+    <div class="row">
+      <div class="row-label">Prélèvement à la source<span class="sub">6,5 % sur base imposable (${fmt(baseImposable)} €)</span></div>
+      <div class="row-value minus">− ${fmt(impot)} €</div>
+    </div>
+    <div class="row">
+      <div class="row-label">Contribution formation pro.<span class="sub">18,24 € × ${mois} mois</span></div>
+      <div class="row-value minus">− ${fmt(cfp)} €</div>
+    </div>
+    <div class="row total">
+      <div class="row-label">Revenu net</div>
+      <div class="row-value">${fmt(net)} €</div>
+    </div>
+  `;
+}
+
+calc();
+</script>
 </body>
 </html>
-
